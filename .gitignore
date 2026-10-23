@@ -1,0 +1,17 @@
+# Dane: za duże dla GitHuba, każdy pobiera je z Zenodo (link w README)
+data/
+ 
+# Środowisko Pythona i pliki tymczasowe
+.venv/
+venv/
+__pycache__/
+*.pyc
+ 
+# Pliki systemowe i PyCharma
+.DS_Store
+.idea/
+ 
+# Zapisane wagi modeli (ciężkie; wykresy z results/figures zostają w repozytorium)
+*.pt
+*.pth
+ 

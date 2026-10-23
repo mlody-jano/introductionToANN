@@ -1,0 +1,122 @@
+group,h5_index,label,class_name,status,ra,dec
+503,503,0,Zaburzona,usuniety,234.883316,38.163704
+540,540,0,Zaburzona,usuniety,112.773735,44.327442
+581,581,0,Zaburzona,usuniety,184.323502,35.988743
+609,609,0,Zaburzona,usuniety,252.070541,43.903206
+622,622,0,Zaburzona,usuniety,121.470398,31.531319
+625,625,0,Zaburzona,usuniety,161.376190,17.129955
+678,678,0,Zaburzona,usuniety,217.437622,42.681923
+683,683,0,Zaburzona,usuniety,153.152451,58.253716
+686,686,0,Zaburzona,usuniety,120.679291,18.631910
+709,709,0,Zaburzona,usuniety,151.893585,23.332138
+735,735,0,Zaburzona,usuniety,237.468033,39.771065
+741,741,0,Zaburzona,usuniety,158.369705,61.267864
+751,751,0,Zaburzona,usuniety,116.006310,21.424862
+778,778,0,Zaburzona,usuniety,246.479477,26.005262
+792,792,0,Zaburzona,usuniety,188.405350,62.878242
+794,794,0,Zaburzona,usuniety,135.834167,52.222992
+831,831,0,Zaburzona,usuniety,164.738449,1.775340
+833,833,0,Zaburzona,usuniety,149.375214,3.463031
+836,836,0,Zaburzona,usuniety,225.124908,26.665567
+854,854,0,Zaburzona,usuniety,242.274567,22.517563
+876,876,0,Zaburzona,usuniety,145.318161,66.685440
+895,895,0,Zaburzona,usuniety,216.159180,25.116217
+921,921,0,Zaburzona,usuniety,212.952789,65.275261
+923,923,0,Zaburzona,usuniety,129.051773,47.367916
+941,941,0,Zaburzona,usuniety,207.168732,31.460882
+951,951,0,Zaburzona,usuniety,114.500679,31.249279
+990,990,0,Zaburzona,usuniety,139.127869,49.947170
+994,994,0,Zaburzona,usuniety,174.892303,26.322388
+1007,1007,0,Zaburzona,usuniety,182.547745,68.083000
+1063,1063,0,Zaburzona,usuniety,140.453873,33.747372
+2021,2021,1,Łącząca się,usuniety,130.421707,40.657448
+2348,2348,1,Łącząca się,usuniety,168.873276,54.370182
+2364,2364,1,Łącząca się,usuniety,181.461365,50.915398
+2369,2369,1,Łącząca się,usuniety,206.642944,60.306992
+2437,2437,1,Łącząca się,usuniety,142.144516,36.474842
+2553,2553,1,Łącząca się,usuniety,135.033997,37.416714
+2599,2599,1,Łącząca się,usuniety,166.308640,42.450027
+2612,2612,1,Łącząca się,usuniety,220.558609,18.686539
+2621,2621,1,Łącząca się,usuniety,213.041397,52.804607
+2656,2656,1,Łącząca się,usuniety,200.175812,52.097874
+2730,2730,1,Łącząca się,usuniety,222.439743,5.225515
+2757,2757,1,Łącząca się,usuniety,160.935364,65.505318
+2882,2882,1,Łącząca się,usuniety,166.403381,56.524929
+2902,2902,1,Łącząca się,usuniety,226.635315,9.449558
+4438,4438,2,Okrągła gładka,usuniety,178.667141,-0.889098
+4489,4489,2,Okrągła gładka,usuniety,200.616424,-1.132132
+5152,5152,2,Okrągła gładka,usuniety,243.440308,24.781343
+5154,5154,2,Okrągła gładka,usuniety,120.786621,8.461012
+678,5220,2,Okrągła gładka,usuniety,217.437622,42.681923
+709,5255,2,Okrągła gładka,usuniety,151.893585,23.332138
+2599,5275,2,Okrągła gładka,usuniety,166.308640,42.450027
+833,5429,2,Okrągła gładka,usuniety,149.375214,3.463031
+5438,5442,2,Okrągła gładka,usuniety,204.212250,34.936241
+921,5508,2,Okrągła gładka,usuniety,212.952789,65.275261
+503,5990,3,Pośrednia gładka,usuniety,234.883316,38.163704
+683,6739,3,Pośrednia gładka,usuniety,153.152451,58.253716
+741,6930,3,Pośrednia gładka,usuniety,158.369705,61.267864
+794,7068,3,Pośrednia gładka,usuniety,135.834167,52.222992
+876,7332,3,Pośrednia gładka,usuniety,145.318161,66.685440
+923,7445,3,Pośrednia gładka,usuniety,129.051773,47.367916
+2348,7744,4,Cygarowata gładka,usuniety,168.873276,54.370182
+8373,8385,5,Spirala z poprzeczką,usuniety,233.565760,-0.195464
+8388,8400,5,Spirala z poprzeczką,usuniety,144.623842,6.265637
+2021,8744,5,Spirala z poprzeczką,usuniety,130.421707,40.657448
+581,9462,5,Spirala z poprzeczką,usuniety,184.323502,35.988743
+2369,9520,5,Spirala z poprzeczką,usuniety,206.642944,60.306992
+10095,10110,6,Spirala ciasna,usuniety,115.729548,19.604905
+10755,10770,6,Spirala ciasna,usuniety,164.747153,6.522511
+4438,10890,6,Spirala ciasna,usuniety,178.667141,-0.889098
+4489,10931,6,Spirala ciasna,usuniety,200.616424,-1.132132
+11156,11173,6,Spirala ciasna,usuniety,216.246368,-3.067023
+11475,11492,6,Spirala ciasna,usuniety,54.117802,1.128996
+5152,11582,6,Spirala ciasna,usuniety,243.440308,24.781343
+5154,11583,6,Spirala ciasna,usuniety,120.786621,8.461012
+5438,11669,6,Spirala ciasna,usuniety,204.212250,34.936241
+2882,11700,6,Spirala ciasna,usuniety,166.403381,56.524929
+11807,11828,7,Spirala luźna,usuniety,339.664864,0.351898
+11951,11972,7,Spirala luźna,usuniety,335.814910,-1.382128
+12038,12059,7,Spirala luźna,usuniety,203.549863,-2.271844
+12215,12236,7,Spirala luźna,usuniety,184.244640,19.123366
+12404,12425,7,Spirala luźna,usuniety,192.476886,12.657947
+11475,12659,7,Spirala luźna,usuniety,53.543953,1.103353
+540,12850,7,Spirala luźna,usuniety,112.773735,44.327442
+2364,13285,7,Spirala luźna,usuniety,181.461365,50.915398
+609,13288,7,Spirala luźna,usuniety,252.070541,43.903206
+622,13357,7,Spirala luźna,usuniety,121.470398,31.531319
+625,13363,7,Spirala luźna,usuniety,161.376190,17.129955
+2437,13439,7,Spirala luźna,usuniety,142.144516,36.474842
+686,13624,7,Spirala luźna,usuniety,120.679291,18.631910
+2553,13642,7,Spirala luźna,usuniety,135.033997,37.416714
+2612,13783,7,Spirala luźna,usuniety,220.558609,18.686539
+2621,13797,7,Spirala luźna,usuniety,213.041397,52.804607
+735,13811,7,Spirala luźna,usuniety,237.468033,39.771065
+751,13851,7,Spirala luźna,usuniety,116.006310,21.424862
+2656,13864,7,Spirala luźna,usuniety,200.175812,52.097874
+778,13911,7,Spirala luźna,usuniety,246.479477,26.005262
+792,13946,7,Spirala luźna,usuniety,188.405350,62.878242
+2730,14003,7,Spirala luźna,usuniety,222.439743,5.225515
+831,14059,7,Spirala luźna,usuniety,164.738449,1.775340
+836,14076,7,Spirala luźna,usuniety,225.124908,26.665567
+854,14118,7,Spirala luźna,usuniety,242.274567,22.517563
+895,14177,7,Spirala luźna,usuniety,216.159180,25.116217
+2902,14286,7,Spirala luźna,usuniety,226.635315,9.449558
+941,14298,7,Spirala luźna,usuniety,207.168732,31.460882
+951,14347,7,Spirala luźna,usuniety,114.500679,31.249279
+990,14391,7,Spirala luźna,usuniety,139.127869,49.947170
+994,14399,7,Spirala luźna,usuniety,174.892303,26.322388
+1007,14411,7,Spirala luźna,usuniety,182.547745,68.083000
+1063,14433,7,Spirala luźna,usuniety,140.453873,33.747372
+11807,14447,8,"Z boku, bez zgrubienia",usuniety,339.664864,0.351898
+11156,14941,8,"Z boku, bez zgrubienia",usuniety,216.246368,-3.067023
+11475,15422,8,"Z boku, bez zgrubienia",usuniety,57.326393,-0.691512
+2757,15424,8,"Z boku, bez zgrubienia",usuniety,160.935364,65.505318
+10095,15960,9,"Z boku, ze zgrubieniem",usuniety,115.729548,19.604905
+11951,16048,9,"Z boku, ze zgrubieniem",usuniety,335.814910,-1.382128
+12038,16118,9,"Z boku, ze zgrubieniem",usuniety,203.549863,-2.271844
+12215,16237,9,"Z boku, ze zgrubieniem",usuniety,184.244640,19.123366
+10755,16614,9,"Z boku, ze zgrubieniem",usuniety,164.747153,6.522511
+8373,16773,9,"Z boku, ze zgrubieniem",usuniety,233.565760,-0.195464
+8388,16795,9,"Z boku, ze zgrubieniem",usuniety,144.623842,6.265637
+12404,16828,9,"Z boku, ze zgrubieniem",usuniety,192.476886,12.657947

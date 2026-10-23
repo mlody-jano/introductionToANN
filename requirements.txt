@@ -1,0 +1,9 @@
+torch==2.14.1
+torchvision==0.29.1
+numpy==2.5.3
+h5py==3.16.0
+pillow>=10.0
+scipy>=1.13
+scikit-learn==1.9.1
+matplotlib==3.11.2
+pyyaml==6.0.3

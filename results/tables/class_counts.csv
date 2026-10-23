@@ -1,0 +1,11 @@
+klasa,nazwa,razem,train,val,test,udzial
+0,Zaburzona,1051,736,158,157,0.0597
+1,Łącząca się,1839,1287,276,276,0.1044
+2,Okrągła gładka,2635,1844,395,396,0.1496
+3,Pośrednia gładka,2021,1415,303,303,0.1147
+4,Cygarowata gładka,333,233,50,50,0.0189
+5,Spirala z poprzeczką,2038,1427,305,306,0.1157
+6,Spirala ciasna,1819,1273,273,273,0.1033
+7,Spirala luźna,2595,1816,389,390,0.1473
+8,"Z boku, bez zgrubienia",1419,993,213,213,0.0806
+9,"Z boku, ze zgrubieniem",1865,1306,280,279,0.1059
