@@ -1,0 +1,9 @@
+{
+  "name": "cnn_aug",
+  "model": "cnn",
+  "augment": true,
+  "epochs": 50,
+  "patience": 5,
+  "lr": 0.001,
+  "seed": 0
+}

@@ -1,0 +1,16 @@
+                        precision    recall  f1-score   support
+
+             Zaburzona      0.222     0.025     0.045       158
+           Łącząca się      0.610     0.641     0.625       276
+        Okrągła gładka      0.701     0.684     0.692       395
+      Pośrednia gładka      0.523     0.726     0.608       303
+     Cygarowata gładka      0.308     0.160     0.211        50
+  Spirala z poprzeczką      0.381     0.298     0.335       305
+        Spirala ciasna      0.435     0.502     0.466       273
+         Spirala luźna      0.409     0.488     0.445       389
+Z boku, bez zgrubienia      0.825     0.798     0.811       213
+Z boku, ze zgrubieniem      0.726     0.718     0.722       280
+
+              accuracy                          0.556      2642
+             macro avg      0.514     0.504     0.496      2642
+          weighted avg      0.540     0.556     0.539      2642
