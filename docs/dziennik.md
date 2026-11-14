@@ -41,3 +41,14 @@
 dane przetworzone są zapisywane w formacie NPZ (natywny format NumPy), ponieważ po 
 zmniejszeniu rozdzielczości mieszczą się w pamięci i są wczytywane w całości na 
 początku treningu, a format ten nie wymaga dodatkowych bibliotek.
+
+
+## Wstępne badania MLP I CNN
+- dla seed 0 MLP +/- 53,3% a CNN 68,3% po 5 epokach
+- CNN bazowa: najlepsza epoka 6 (val 68,1%), od epoki 7 przeuczenie: strata treningowa 0,05, walidacyjna 2,80 w epoce 30 
+
+## Pierwsze wyniki tak dla porownania od startu sa w `results/noTune`
+**Wnioski jakie wynikaja z tego:**
+- Zaburzona to najsłabsza klasa i najczęściej zamienia się w spiralę luźną. Obie mają nieregularny kształt. To prawdopodobnie te same klasy, z którymi mieli problem ludzie z Galaxy Zoo. Przy usuwaniu duplikatów ze sprzecznymi etykietami najwięcej obrazów ubyło właśnie z klas Zaburzona (−30) i Spirala luźna (−33). Trzeba szobaczyc w `results/tables/duplicates.csv` czy to rzeczywiście te pary. Jak tak to spoko wniosek - sieć myli te same klasy, które mylą ludzie.
+- Cygarowata gładka ma recall tylko 46%, a do tego tylko 50 obrazów walidacyjnych i 233 treningowe. 18% z nich trafia do klasy „z boku, ze zgrubieniem”, co ma sens, bo obie są wydłużone. Sieć widziała mało przykładów tej klasy. Hipoteza: pomogą wagi klas albo augmentacja.
+- Mocne klasy to te o wyraźnym, prostym kształcie: okrągła gładka (89%), z boku bez zgrubienia (85%), z boku ze zgrubieniem (80%), pośrednia gładka (77%). Galaktyki widziane z boku mylą się czasem ze sobą (po 8% w obie strony), bo różni je tylko zgrubienie w środku.

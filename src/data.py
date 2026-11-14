@@ -1,10 +1,3 @@
-"""
-Wczytanie przygotowanych danych Galaxy10 do PyTorcha.
-
-Uruchom z głównego folderu projektu, żeby sprawdzić, czy wszystko działa:
-    python src/data.py
-"""
-
 import numpy as np
 import torch
 from torch.utils.data import TensorDataset, DataLoader
@@ -22,7 +15,7 @@ def to_tensor(X, mean, std):
     return tensor
 
 
-def load_data(path, batch_size=32):
+def load_data(path, batch_size=64):
     d = np.load(path)
     mean, std = d["mean"], d["std"]   # jedne wartości dla wszystkich zbiorów, policzone na train
 
@@ -42,6 +35,22 @@ def load_data(path, batch_size=32):
     test_loader = DataLoader(test_ds, batch_size=batch_size, shuffle=False)
 
     return train_loader, valid_loader, test_loader, d["class_names"].tolist()
+
+
+def augment_batch(xb):
+    """
+    Augmentacja partii obrazów (tylko przy treningu): każdy obraz osobno obracany o 0, 90, 180
+    albo 270 stopni i w połowie przypadków odbijany lustrzanie.
+    """
+    n = xb.shape[0]
+    turns = torch.randint(0, 4, (n,), device=xb.device)       # ile razy obrócić o 90 stopni (0-3)
+    flip = torch.rand(n, device=xb.device) < 0.5              # True dla obrazów do odbicia
+    out = torch.empty_like(xb)
+    for k in range(4):
+        sel = turns == k                                      # obrazy, które obracamy k razy
+        out[sel] = torch.rot90(xb[sel], k, dims=(2, 3))       # obrót w płaszczyźnie (wiersze, kolumny)
+    out[flip] = torch.flip(out[flip], dims=(3,))              # odbicie lewo-prawo
+    return out
 
 
 if __name__ == "__main__":
@@ -73,6 +82,21 @@ if __name__ == "__main__":
     d = np.load(path)
     mean = torch.from_numpy(d["mean"]).view(3, 1, 1)
     std = torch.from_numpy(d["std"]).view(3, 1, 1)
+    torch.manual_seed(1)
+    versions = augment_batch(xb[:1].repeat(8, 1, 1, 1))     # 8 kopii pierwszego obrazu, każda losowo zmieniona
+    versions[0] = xb[0]                                     # pierwsza zostaje oryginałem
+    fig, axes = plt.subplots(1, 8, figsize=(12, 1.9), dpi=120)
+    for ax, v in zip(axes, versions):
+        ax.imshow((v * std + mean).permute(1, 2, 0).clamp(0, 1))
+        ax.set_xticks([])
+        ax.set_yticks([])
+    axes[0].set_title("oryginał", fontsize=9)
+    fig.tight_layout()
+    fig.savefig("results/figures/augmentation_examples.png")
+    print("Test 4: zapisano results/figures/augmentation_examples.png")
+
+    # --- Test 5: podgląd jednego obrazu z partii
+    plt.figure()
     img = xb[0] * std + mean           # odwrócenie normalizacji: z powrotem do zakresu 0-1
     img = img.permute(1, 2, 0)         # (3, 64, 64) -> (64, 64, 3), bo tak rysuje matplotlib
     plt.imshow(img.clamp(0, 1))        # clamp obcina wartości do 0-1 (błędy zaokrągleń)

@@ -14,4 +14,6 @@ __pycache__/
 # Zapisane wagi modeli (ciężkie; wykresy z results/figures zostają w repozytorium)
 *.pt
 *.pth
+
+runs
  
