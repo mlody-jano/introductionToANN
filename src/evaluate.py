@@ -20,7 +20,8 @@ import torch
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, f1_score
 
 from data import load_data
-from train import MODELS, pick_device
+from models import build_model
+from train import pick_device
 
 
 @torch.no_grad()
@@ -72,17 +73,19 @@ def most_confused(cm, class_names, top=5):
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description="Ocena wytrenowanej sieci na zbiorze walidacyjnym")
     p.add_argument("--name", required=True, help="nazwa przebiegu z results/runs/")
-    run_dir = Path("results/runs") / p.parse_args().name
+    name = p.parse_args().name                     # pełna nazwa, np. lr/0.001_s0
+    run_dir = Path("results/runs") / name
 
     config = json.loads((run_dir / "config.json").read_text(encoding="utf-8"))   # ustawienia z treningu
     device = pick_device()
-    _, val_loader, _, class_names = load_data("data/processed/galaxy10_64.npz")
+    size = config.get("size", 64)                                                 # rozdzielczość z treningu
+    _, val_loader, _, class_names = load_data(f"data/processed/galaxy10_{size}.npz")
 
-    model = MODELS[config["model"]]().to(device)                                  # ta sama architektura co w treningu
+    model = build_model(config).to(device)                                        # ta sama architektura co w treningu
     model.load_state_dict(torch.load(run_dir / "model.pt", map_location=device))  # wagi najlepszej epoki
 
     y_true, y_pred = predict(model, val_loader, device)
-    print(f"przebieg: {run_dir.name}")
+    print(f"przebieg: {name}")
     print(f"dokładność val: {accuracy_score(y_true, y_pred):.1%}")
     print(f"makro-F1 val:   {f1_score(y_true, y_pred, average='macro'):.3f}\n")
 
@@ -95,6 +98,13 @@ if __name__ == "__main__":
         print(f"  {true_name} -> {pred_name}: {n} obrazów ({share:.0%} tej klasy)")
 
     (run_dir / "report.txt").write_text(report, encoding="utf-8")
+    metrics = {                                     # wyniki w pliku, żeby skrypt serii mógł je zebrać
+        "accuracy": round(float(accuracy_score(y_true, y_pred)), 5),
+        "macro_f1": round(float(f1_score(y_true, y_pred, average="macro")), 5),
+        "f1_per_class": {cls: round(float(f), 5)
+                         for cls, f in zip(class_names, f1_score(y_true, y_pred, average=None))},
+    }
+    (run_dir / "metrics.json").write_text(json.dumps(metrics, indent=2, ensure_ascii=False), encoding="utf-8")
     plot_confusion(cm, class_names, run_dir / "confusion.png",
-                   f"{run_dir.name}, zbiór walidacyjny: % obrazów danej klasy w każdej kolumnie")
+                   f"{name}, zbiór walidacyjny: % obrazów danej klasy w każdej kolumnie")
     print(f"\nzapisano: {run_dir}/report.txt, {run_dir}/confusion.png")

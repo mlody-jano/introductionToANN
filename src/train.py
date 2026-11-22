@@ -10,6 +10,11 @@ np:
     python src/train.py --name cnn_base
     python src/train.py --name cnn_aug --augment
     python src/train.py --name mlp_base --model mlp
+    python src/train.py --name cnn_4bloki --augment --blocks 4
+    python src/train.py --name cnn_elu_bn --augment --activation elu --batchnorm
+    python src/train.py --name mlp_1warstwa --model mlp --hidden 256
+    python src/train.py --name cnn_sgd --augment --optimizer sgd --lr 0.01
+    python src/train.py --name cnn_wagi --augment --class-weights
 """
 
 import argparse
@@ -27,21 +32,54 @@ import torch
 from torch import nn
 
 from data import augment_batch, load_data
-from models import CNN, MLP
-
-MODELS = {"mlp": MLP, "cnn": CNN}   # nazwa z wiersza poleceń -> klasa modelu
+from models import ACTIVATIONS, build_model, count_parameters
 
 
 def parse_args():
     p = argparse.ArgumentParser(description="Trening sieci na Galaxy10")
     p.add_argument("--name", required=True, help="nazwa przebiegu; wyniki trafią do results/runs/<nazwa>/")
-    p.add_argument("--model", choices=list(MODELS), default="cnn", help="architektura sieci")
+    # architektura
+    p.add_argument("--model", choices=["mlp", "cnn"], default="cnn", help="rodzaj sieci")
+    p.add_argument("--blocks", type=int, default=3, help="CNN: liczba bloków konwolucyjnych")
+    p.add_argument("--filters", type=int, default=32,
+                   help="CNN: filtry w pierwszym bloku (w każdym następnym 2 razy więcej)")
+    p.add_argument("--hidden", type=int, nargs="+", default=None,
+                   help="neurony w warstwach ukrytych, np. --hidden 512 256 "
+                        "(domyślnie: MLP 512 256, CNN 256)")
+    p.add_argument("--activation", choices=list(ACTIVATIONS), default="relu", help="funkcja aktywacji")
+    p.add_argument("--dropout", type=float, default=0.3, help="ułamek neuronów wyłączanych przy treningu")
+    p.add_argument("--batchnorm", action="store_true", help="CNN: normalizacja wsadowa w każdym bloku")
+    # --- trening
     p.add_argument("--augment", action="store_true", help="losowe obroty i odbicia obrazów treningowych")
     p.add_argument("--epochs", type=int, default=50, help="najwięcej epok")
     p.add_argument("--patience", type=int, default=5, help="koniec po tylu epokach bez poprawy straty val")
     p.add_argument("--lr", type=float, default=0.001, help="współczynnik uczenia")
+    p.add_argument("--optimizer", choices=["adam", "sgd"], default="adam",
+                   help="adam albo sgd (czysty spadek gradientowy)")
+    p.add_argument("--momentum", type=float, default=0.0, help="SGD: pęd (0 = czysty spadek gradientowy)")
+    p.add_argument("--weight-decay", type=float, default=0.0, help="kara za duże wagi (regularyzacja)")
+    p.add_argument("--class-weights", action="store_true",
+                   help="ważona funkcja straty: błędy na rzadkich klasach kosztują więcej")
+    # dane
+    p.add_argument("--size", type=int, choices=[64, 128], default=64,
+                   help="rozdzielczość obrazów (wymaga python src/prepare_data.py --size 128)")
     p.add_argument("--seed", type=int, default=0, help="ziarno losowania")
     return p.parse_args()
+
+
+def make_optimizer(model, args):
+    # optymalizator według opcji: Adam albo SGD, oba z opcjonalną karą za duże wagi
+    if args.optimizer == "sgd":
+        return torch.optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum,
+                               weight_decay=args.weight_decay)
+    return torch.optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+
+
+def class_weights(labels, n_classes):
+    # Waga każdej klasy = wszystkie obrazy / (liczba klas * obrazy tej klasy)
+    # Rzadka klasa dostaje dużą wagę a częsta małą
+    counts = torch.bincount(labels, minlength=n_classes).float()
+    return len(labels) / (n_classes * counts)
 
 
 def pick_device():
@@ -70,7 +108,7 @@ def train_one_epoch(model, loader, loss_fn, optimizer, device, augment=False):
     return total_loss / n
 
 
-@torch.no_grad()                                    # tylko ocena, więc bez gradientów
+@torch.no_grad()                                    # tylko oceniamy, więc bez liczenia gradientów
 def evaluate(model, loader, loss_fn, device):
     # srednia strata i dokładność na podanym zbiorze; wagi się nie zmieniają
     model.eval()                                    # tryb oceny: dropout wyłączony
@@ -126,12 +164,22 @@ if __name__ == "__main__":
 
     torch.manual_seed(args.seed)
     device = pick_device()
-    print(f"przebieg: {args.name} | model: {args.model} | augmentacja: {args.augment} | urządzenie: {device}")
+    print(f"przebieg: {args.name} | model: {args.model} | optymalizator: {args.optimizer} | "
+          f"augmentacja: {args.augment} | obrazy: {args.size}px | urządzenie: {device}")
 
-    train_loader, val_loader, _, class_names = load_data("data/processed/galaxy10_64.npz")
-    model = MODELS[args.model]().to(device)        # MLP() albo CNN(), na GPU
-    loss_fn = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    data_path = Path(f"data/processed/galaxy10_{args.size}.npz")
+    if not data_path.exists():
+        raise SystemExit(f"Brak {data_path}. Najpierw: python src/prepare_data.py --size {args.size}")
+    train_loader, val_loader, _, class_names = load_data(data_path)
+    model = build_model(vars(args)).to(device)     # sieć według opcji z polecenia, na GPU
+    print(f"parametry sieci: {count_parameters(model):,}".replace(",", " "))
+    if args.class_weights:
+        weights = class_weights(train_loader.dataset.tensors[1], len(class_names))
+        print("wagi klas:", [round(w, 2) for w in weights.tolist()])
+        loss_fn = nn.CrossEntropyLoss(weight=weights.to(device))
+    else:
+        loss_fn = nn.CrossEntropyLoss()
+    optimizer = make_optimizer(model, args)
 
     history = {"train_loss": [], "val_loss": [], "val_acc": []}   # wyniki każdej epoki
     best_val_loss = float("inf")    # najlepsza strata val do tej pory (na start: nieskończoność)
@@ -139,6 +187,7 @@ if __name__ == "__main__":
     best_state = None               # kopia wag z najlepszej epoki
     epochs_without_improvement = 0
 
+    run_start = time.time()                         # czas całego treningu
     for epoch in range(1, args.epochs + 1):
         start = time.time()
         train_loss = train_one_epoch(model, train_loader, loss_fn, optimizer, device, args.augment)
@@ -151,7 +200,7 @@ if __name__ == "__main__":
         print(f"epoka {epoch}: strata train {train_loss:.3f} | strata val {val_loss:.3f} | "
               f"dokładność val {val_acc:.1%} | {time.time() - start:.1f} s")
 
-        # --- wczesne zatrzymanie
+        # wczesne zatrzymanie
         if val_loss < best_val_loss:                        # nowy rekord: pamietanie wersji sieci
             best_val_loss = val_loss
             best_epoch = epoch
@@ -169,6 +218,15 @@ if __name__ == "__main__":
     print(f"\nnajlepsza epoka: {best_epoch} | strata val {val_loss:.3f} | dokładność val {val_acc:.1%}")
 
     torch.save(best_state, run_dir / "model.pt")
+    summary = {                                     # najważniejsze liczby przebiegu, dla skryptu serii
+        "best_epoch": best_epoch,
+        "epochs_run": len(history["train_loss"]),
+        "val_loss": round(val_loss, 5),
+        "val_acc": round(val_acc, 5),
+        "seconds": round(time.time() - run_start, 1),
+        "params": count_parameters(model),
+    }
+    (run_dir / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     save_history(history, run_dir / "history.csv")
     plot_curves(history, run_dir / "curves.png", best_epoch,
                 f"{args.name}: najlepsza epoka {best_epoch}, dokładność val {val_acc:.1%}")
