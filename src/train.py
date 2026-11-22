@@ -30,6 +30,7 @@ matplotlib.use("Agg")  # wykres do pliku, bez otwierania okna
 import matplotlib.pyplot as plt
 import torch
 from torch import nn
+from tqdm import tqdm
 
 from data import augment_batch, load_data
 from models import ACTIVATIONS, build_model, count_parameters
@@ -94,7 +95,10 @@ def train_one_epoch(model, loader, loss_fn, optimizer, device, augment=False):
     # jedno przejście przez cały zbiór treningowy; zwraca średnią stratę
     model.train()                                   # tryb treningu: dropout włączony
     total_loss, n = 0.0, 0
-    for xb, yb in loader:                           # partia po partii
+    # pasek postępu po partiach; znika po epoce (leave=False),
+    # a wyłącza się sam, gdy wyjście idzie do pliku, a nie na ekran (disable=None)
+    bar = tqdm(loader, desc="  trening", unit="partia", leave=False, disable=None)
+    for xb, yb in bar:                              # partia po partii
         xb, yb = xb.to(device), yb.to(device)       # dane na GPU
         if augment:
             xb = augment_batch(xb)                  # losowe obroty i odbicia (tylko przy treningu)
@@ -105,6 +109,7 @@ def train_one_epoch(model, loader, loss_fn, optimizer, device, augment=False):
         optimizer.step()                            # 5. popraw wagi
         total_loss += loss.item() * len(yb)
         n += len(yb)
+        bar.set_postfix(strata=f"{total_loss / n:.3f}")   # średnia strata od początku epoki
     return total_loss / n
 
 

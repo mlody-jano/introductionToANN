@@ -6,6 +6,9 @@ Przebiegi trafiają do results/runs/<seria>/<wartość>_s<seed>/,
 podsumowanie do results/series/<seria>/ (runs.csv, summary.csv, macro_f1.png).
 Przebiegi już policzone są pomijane, więc przerwaną serię można po prostu uruchomić ponownie.
 
+Na ekranie: pasek postępu całej serii i jedna linijka wyników na przebieg. Pełne wyjście
+train.py i evaluate.py trafia do train.log i eval.log w folderze przebiegu.
+
 Wszystkie pozostałe opcje (np. --augment, --model mlp) trafiają bez zmian do każdego train.py,
 czyli są wspólne dla całej serii.
 
@@ -21,6 +24,7 @@ Przykłady (z głównego folderu projektu):
 import argparse
 import csv
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -30,6 +34,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from tqdm import tqdm
 
 FLAGS = {"augment", "batchnorm", "class-weights"}   # opcje bez wartości: włączone (on) albo nie (off)
 
@@ -55,10 +60,25 @@ def option_args(param, value):
     return [f"--{param}", *value.split()]
 
 
-def run(cmd):
-    """Uruchamia polecenie i przerywa serię, jeśli zakończy się błędem."""
-    print("\n$", " ".join(cmd), flush=True)
-    subprocess.run(cmd, check=True)
+def run(cmd, log_path):
+    """
+    Uruchamia polecenie, a wszystko, co wypisuje, zapisuje do pliku log_path zamiast na ekran.
+    Przy błędzie pokazuje koniec logu i przerywa serię.
+    """
+    env = {**os.environ, "PYTHONUNBUFFERED": "1"}   # linie trafiają do logu od razu, nie na końcu
+    with open(log_path, "w", encoding="utf-8") as log:
+        result = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, env=env)
+    if result.returncode != 0:
+        tail = log_path.read_text(encoding="utf-8").splitlines()[-15:]
+        tqdm.write("\n".join(tail))
+        raise SystemExit(f"\nbłąd w: {' '.join(cmd)}\npełny log: {log_path}")
+
+
+def read_run(run_dir):
+    """Wyniki jednego przebiegu: metrics.json (z evaluate.py) i summary.json (z train.py) razem."""
+    metrics = json.loads((run_dir / "metrics.json").read_text(encoding="utf-8"))
+    summary = json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
+    return {**metrics, **summary}
 
 
 def summarize(rows, values, series, param):
@@ -126,25 +146,28 @@ def summarize(rows, values, series, param):
 if __name__ == "__main__":
     args, base = parse_args()                       # base: np. ["--augment"] albo ["--model", "mlp"]
     series = args.series or args.param
-    total = len(args.values) * len(args.seeds)
+    runs_dir = Path("results/runs")
+
+    # wszystkie przebiegi serii: (wartość, seed, nazwa); do policzenia tylko te bez metrics.json
+    jobs = [(v, s, f"{series}/{v.replace(' ', '-')}_s{s}") for v in args.values for s in args.seeds]
+    todo = [job for job in jobs if not (runs_dir / job[2] / "metrics.json").exists()]
     print(f"seria {series}: {args.param} = {args.values}, seedy {args.seeds}, "
-          f"opcje wspólne: {' '.join(base) or 'brak'} ({total} przebiegów)")
+          f"opcje wspólne: {' '.join(base) or 'brak'}")
+    print(f"przebiegów: {len(jobs)}, już policzonych: {len(jobs) - len(todo)}, do policzenia: {len(todo)}")
+    print("szczegóły trwającego przebiegu: tail -f results/runs/<seria>/<przebieg>/train.log\n")
 
-    rows, done = [], 0
-    for value in args.values:
-        for seed in args.seeds:
-            done += 1
-            name = f"{series}/{value.replace(' ', '-')}_s{seed}"
-            run_dir = Path("results/runs") / name
-            if (run_dir / "metrics.json").exists():
-                print(f"[{done}/{total}] pomijam {name}: już policzony")
-            else:
-                print(f"\n[{done}/{total}] {name}")
-                run([sys.executable, "src/train.py", "--name", name, "--seed", str(seed),
-                     *base, *option_args(args.param, value)])
-                run([sys.executable, "src/evaluate.py", "--name", name])
-            metrics = json.loads((run_dir / "metrics.json").read_text(encoding="utf-8"))
-            summary = json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
-            rows.append({"value": value, "seed": seed, **metrics, **summary})
+    bar = tqdm(todo, desc=f"seria {series}", unit="przebieg", disable=not todo)   # bez paska, gdy nic do zrobienia
+    for value, seed, name in bar:
+        bar.set_postfix_str(name)                   # który przebieg trwa teraz
+        run_dir = runs_dir / name
+        run_dir.mkdir(parents=True, exist_ok=True)
+        run([sys.executable, "src/train.py", "--name", name, "--seed", str(seed),
+             *base, *option_args(args.param, value)], run_dir / "train.log")
+        run([sys.executable, "src/evaluate.py", "--name", name], run_dir / "eval.log")
+        r = read_run(run_dir)
+        tqdm.write(f"  {name:<24} makro-F1 {r['macro_f1']:.3f} | dokładność {r['accuracy']:.1%} | "
+                   f"najl. epoka {r['best_epoch']} z {r['epochs_run']} | {r['seconds'] / 60:.1f} min")
+    bar.close()
 
+    rows = [{"value": v, "seed": s, **read_run(runs_dir / name)} for v, s, name in jobs]
     summarize(rows, args.values, series, args.param)
